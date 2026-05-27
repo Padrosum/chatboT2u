@@ -43,9 +43,26 @@ func main() {
 
 	seedMsg := *seed
 	if !*skipSetup {
-		// Kurulum ekranı
+		// Senaryo galerisi
+		gallery := tui.NewGallery()
+		p := tea.NewProgram(gallery, tea.WithAltScreen())
+		fm, err := p.Run()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Galeri hatası: %v\n", err)
+			os.Exit(1)
+		}
+		if gm, ok := fm.(*tui.GalleryModel); ok && gm.Done() {
+			sc := gm.Selected()
+			cfg.BotA = sc.BotA
+			cfg.BotB = sc.BotB
+			if seedMsg == "" {
+				seedMsg = sc.SeedMsg
+			}
+		}
+
+		// Kimlik kurulum ekranı
 		setupModel := tui.NewSetup(cfg)
-		p := tea.NewProgram(setupModel, tea.WithAltScreen())
+		p = tea.NewProgram(setupModel, tea.WithAltScreen())
 		finalModel, err := p.Run()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Kurulum hatası: %v\n", err)
